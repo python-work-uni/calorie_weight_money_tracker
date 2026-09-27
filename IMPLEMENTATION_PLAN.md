@@ -58,11 +58,12 @@ These exist so a fresh session can pick up any milestone without re-deriving con
 
 ### Prerequisites the human must perform (cannot be automated)
 
+- **Enable GitHub Pages** once: repo → Settings → Pages → *Build and deployment* → Source = **GitHub Actions**. The workflow cannot do this itself; `actions/configure-pages` fails with "Get Pages site failed" until it is enabled, so every deploy fails until then. (Verified in M0: `npm ci` and `npm run build` both pass; only this step fails.)
 - Create the Supabase project; provide URL + anon key.
 - Run `supabase login` / link, or paste the project ref.
 - Add `OPENROUTER_API_KEY` and `OPENROUTER_MODEL` as function secrets.
+- Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` as **repo secrets**, and pass them into the build step (M1).
 - Create the single user account (sign in once) — then **disable public signups**.
-- Add repo secrets for the Actions workflow.
 
 ---
 
