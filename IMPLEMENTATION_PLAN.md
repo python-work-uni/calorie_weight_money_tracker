@@ -218,11 +218,13 @@ where relname in ('profiles','weight_logs','food_entries','food_categories',
 **Goal:** a fully working tracker with no AI involved. This is the fallback, so it must be solid.
 
 **Tasks**
-1. `useFood.ts` + `useCategories.ts`.
-2. `Calories.tsx`: day view, add/edit/delete entries (name, grams, kcal, category).
-3. `CalorieCharts.tsx`: daily kcal vs target (bar + target reference line), trend over 7/30/90, kcal by category (donut).
-4. `Today.tsx`: calorie progress ring, today's list, quick-add actions.
-5. Entries carry `source: 'manual' | 'ai'`; render AI ones distinctly even before M5 exists.
+1. `src/lib/calories.ts`: day totals, zero-filled daily series, category grouping, target comparison. Pure and tested. The series deliberately includes days with **no** entries — otherwise a bar chart hides the gaps and the x-axis misrepresents the spacing.
+2. `useFood.ts`, `useCategories.ts`, and `useProfile.ts` (profile + latest weight → derived target, shared by Today/Calories/Charts).
+3. `Calories.tsx`: day view with add/edit/delete (name, grams, kcal, category, note).
+4. `CalorieCharts.tsx`: daily kcal vs target (bar + reference line, over-target days in red), 7/30/90 range, kcal-by-category donut, range summary stats.
+5. `Today.tsx`: progress ring, today's list, quick add, links out.
+6. `Categories.tsx`: manage food and spending categories (add/rename/recolour/delete). Built here because M4's category picker needs somewhere to add them.
+7. Entries carry `source: 'manual' | 'ai'`; AI rows are badged even before M5 exists.
 
 **Verify**
 - Log a full day; the day total matches the sum of entries.
