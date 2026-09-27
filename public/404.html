@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="robots" content="noindex" />
+    <title>Dashboard</title>
+    <script>
+      // GitHub Pages has no server-side rewrites: a direct request for a deep
+      // link (e.g. /spending) matches no file and lands here instead of in the
+      // app. Stash the intended route, then hand control to the app at its root.
+      // src/main.tsx restores it before the router mounts.
+      (function () {
+        var base = '/calorie_weight_money_tracker/';
+        var route = window.location.pathname.replace(base, '/');
+        if (route.charAt(0) !== '/') route = '/' + route;
+        try {
+          sessionStorage.setItem(
+            'spa:redirect',
+            route + window.location.search + window.location.hash,
+          );
+        } catch (e) {
+          // sessionStorage unavailable (private mode); fall through to the root.
+        }
+        window.location.replace(base);
+      })();
+    </script>
+  </head>
+  <body></body>
+</html>
