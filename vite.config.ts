@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 
 // Builds fail loudly if these are missing, so a misconfigured deploy is caught
 // in CI rather than showing a white screen to the user.
-const REQUIRED_ENV = ['VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY'] as const
+const REQUIRED_ENV = ['VITE_SUPABASE_URL', 'VITE_SUPABASE_PUBLISHABLE_KEY'] as const
 
 export default defineConfig(({ command, mode }) => {
   // Values from `.env*` files, plus real environment variables (CI passes the

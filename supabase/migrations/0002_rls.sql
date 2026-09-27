@@ -1,7 +1,8 @@
 -- Row level security.
 --
 -- This file is the backbone of the project's security requirement: nobody but
--- the signed-in owner may read or write any row, even with the public anon key.
+-- the signed-in owner may read or write any row, even with the public
+-- publishable key (formerly called the anon key).
 --
 -- Policies are generated in a loop so every table gets an identical, auditable
 -- set. Two properties matter:

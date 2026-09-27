@@ -52,18 +52,22 @@ These exist so a fresh session can pick up any milestone without re-deriving con
 | Name | Where | Secret? |
 |---|---|---|
 | `VITE_SUPABASE_URL` | build / GitHub Actions | no |
-| `VITE_SUPABASE_ANON_KEY` | build / GitHub Actions | no (RLS protects data) |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | build / GitHub Actions | no (RLS protects data) |
 | `OPENROUTER_API_KEY` | Supabase edge function secret | **yes** |
 | `OPENROUTER_MODEL` | Supabase edge function secret | no (config) |
+
+Note: Supabase now issues **publishable** keys (`sb_publishable_…`) in place of the older
+**anon** JWT keys. They occupy the same role — public, client-side, protected by RLS. This
+project uses the publishable key and names the variable accordingly.
 
 ### Prerequisites the human must perform (cannot be automated)
 
 - **Enable GitHub Pages** once: repo → Settings → Pages → *Build and deployment* → Source = **GitHub Actions**. The workflow cannot do this itself; `actions/configure-pages` fails with "Get Pages site failed" until it is enabled, so every deploy fails until then. (Verified in M0: `npm ci` and `npm run build` both pass; only this step fails.)
-- Create the Supabase project; provide URL + anon key.
-- Run `supabase login` / link, or paste the project ref.
+- Create the Supabase project; provide URL + publishable key.
+- Run `supabase login` and `supabase link --project-ref <ref>` once, locally. `link` prompts for the database password, so it is interactive and cannot be scripted here.
 - Add `OPENROUTER_API_KEY` and `OPENROUTER_MODEL` as function secrets.
-- Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` as **repo secrets**, and pass them into the build step (M1).
-- Create the single user account (sign in once) — then **disable public signups**.
+- Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` as **repo secrets**, and pass them into the build step (M1).
+- Create the single user account (sign in once) — then **disable public signups**. Verified live: `disable_signup` starts `false`, so this step is required.
 
 ---
 
@@ -146,7 +150,7 @@ Every milestone: **Goal → Tasks → Verify → Done when.** Do not merge miles
 
 **Verify** — this is the milestone's whole point, do all three:
 1. Log in from a browser; navigate to a data route. It works.
-2. **Anonymous check:** `curl` the Supabase REST endpoint for `food_entries` with only the anon key and no user token. Expect an empty array, never rows.
+2. **Anonymous check:** `curl` the Supabase REST endpoint for `food_entries` with only the publishable key and no user token. Expect an empty array, never rows.
 3. **Cross-user check:** in the SQL editor, confirm every table reports `rowsecurity = true`:
    ```sql
    SELECT relname, relrowsecurity FROM pg_class

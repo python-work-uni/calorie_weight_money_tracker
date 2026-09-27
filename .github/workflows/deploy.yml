@@ -28,7 +28,7 @@ jobs:
         env:
           # Public values by design; RLS protects the data. Set as repo secrets.
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
       - uses: actions/configure-pages@v5
         with:
           # First run has no Pages site yet; let the workflow enable it so a
