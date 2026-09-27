@@ -343,6 +343,8 @@ where relname in ('profiles','weight_logs','food_entries','food_categories',
 3. Accessibility pass: charts paired with numeric summaries, tap targets ≥44px.
 4. Security sweep: build and grep `dist/` for the OpenRouter key and any `service_role` string — **expect zero hits**.
 5. Confirm public signups remain disabled in Supabase.
+6. **Stale-build detection.** Every deploy changes the entry chunk's hash, but a tab left open keeps running the old bundle, and client-side navigation never re-fetches code — so screens can silently show a previous build and look like a broken deploy. Fetch the deployed `index.html` (cache-busted) on window focus and offer a "New version available — reload" prompt.
+7. **Form field `name`/`id` attributes.** Surfaced by the live console in M4: autofill and password managers key off them, and this app is mostly used on a phone. Also add a favicon — the console shows a 404 for one.
 
 **Verify**
 - Export JSON → clear → re-import → identical counts and totals.
@@ -361,6 +363,7 @@ where relname in ('profiles','weight_logs','food_entries','food_categories',
 | SPA deep links on Pages | Direct URL 404s | `404.html` fallback + verify in M0 |
 | Missing RLS | Data readable anonymously | Explicit test in M1 (anonymous write must fail `42501`); re-check before M8 |
 | PostgREST schema cache lags | Newly created tables return `404 / PGRST205` straight after a migration | Wait for the cache to refresh, or run `notify pgrst, 'reload schema'`. It is not a migration failure. |
+| Open tab keeps running an old build | A screen shows content from an earlier deploy; looks like a broken deploy | Client-side navigation never re-fetches code. Hard reload the tab. Permanent fix is the stale-build detector in M8. |
 | Free model lacks `response_format` | 400 or unparseable output | Forced `tool_choice`, never `response_format` |
 | Web plugin + forced tool call | Search results ignored, or 400 | Search plugin runs once per request; if it conflicts with `tool_choice`, split into two calls (research, then emit) |
 | Free-model rate limits | 429s | Check limits; fall back to paid slug |
