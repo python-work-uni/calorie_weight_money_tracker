@@ -1,5 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout'
+import RequireAuth from './components/RequireAuth'
+import { SessionProvider } from './hooks/useSession'
 import AiAgent from './routes/AiAgent'
 import CalorieCharts from './routes/CalorieCharts'
 import Calories from './routes/Calories'
@@ -14,21 +16,32 @@ import Weight from './routes/Weight'
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route element={<Layout />}>
-        <Route index element={<Today />} />
-        <Route path="calories" element={<Calories />} />
-        <Route path="calories/charts" element={<CalorieCharts />} />
-        <Route path="calories/ai" element={<AiAgent />} />
-        <Route path="weight" element={<Weight />} />
-        <Route path="spending" element={<Spending />} />
-        <Route path="spending/charts" element={<SpendingCharts />} />
-        <Route path="insights" element={<Insights />} />
-        <Route path="profile" element={<Profile />} />
-        <Route path="categories" element={<Categories />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Route>
-    </Routes>
+    <SessionProvider>
+      <Routes>
+        {/* The only screen reachable without a session. */}
+        <Route path="/login" element={<Login />} />
+
+        {/* Everything else requires a signed-in user. */}
+        <Route
+          element={
+            <RequireAuth>
+              <Layout />
+            </RequireAuth>
+          }
+        >
+          <Route index element={<Today />} />
+          <Route path="calories" element={<Calories />} />
+          <Route path="calories/charts" element={<CalorieCharts />} />
+          <Route path="calories/ai" element={<AiAgent />} />
+          <Route path="weight" element={<Weight />} />
+          <Route path="spending" element={<Spending />} />
+          <Route path="spending/charts" element={<SpendingCharts />} />
+          <Route path="insights" element={<Insights />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="categories" element={<Categories />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Route>
+      </Routes>
+    </SessionProvider>
   )
 }
