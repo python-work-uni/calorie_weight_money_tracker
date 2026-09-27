@@ -150,16 +150,26 @@ Every milestone: **Goal → Tasks → Verify → Done when.** Do not merge miles
 
 **Verify** — this is the milestone's whole point, do all three:
 1. Log in from a browser; navigate to a data route. It works.
-2. **Anonymous check:** `curl` the Supabase REST endpoint for `food_entries` with only the publishable key and no user token. Expect an empty array, never rows.
-3. **Cross-user check:** in the SQL editor, confirm every table reports `rowsecurity = true`:
-   ```sql
-   SELECT relname, relrowsecurity FROM pg_class
-   WHERE relname IN ('profiles','weight_logs','food_entries','food_categories',
-                     'spending_entries','spending_categories','ai_jobs');
+2. **Anonymous write check (the decisive one).** `POST` a plausible row to *every* table at the REST endpoint using only the publishable key, with no user token. Every request must be denied with `42501 new row violates row-level security policy`.
+   ```bash
+   curl -s -w " |HTTP:%{http_code}" -X POST \
+     "https://<ref>.supabase.co/rest/v1/food_entries" \
+     -H "apikey: <publishable key>" -H "Content-Type: application/json" \
+     -d '{"user_id":"00000000-0000-0000-0000-000000000000","date":"2000-01-01","name":"probe","kcal":1}'
    ```
-   All must be `true`.
+   `42501` proves RLS is enabled *and* that the policy denied the write. A `201` means RLS is off on that table — a critical failure, and the probe row must be deleted.
+3. **Anonymous read check.** `SELECT` from each table anonymously; expect `[]` and never rows.
 
-**Done when:** all three checks pass. **This is a Decision Gate — report the results before M2.**
+> Do **not** rely on the anonymous read check alone. While the tables are empty it returns `[]` whether or not RLS is enabled, so it cannot distinguish "denied" from "nothing to see". The insert check in step 2 is the one that actually proves the property.
+
+For a raw catalog view when a `psql` connection is available:
+```sql
+select relname, relrowsecurity from pg_class
+where relname in ('profiles','weight_logs','food_entries','food_categories',
+                  'spending_entries','spending_categories','ai_jobs');
+```
+
+**Done when:** every table denies the anonymous write and the owner can read their own rows. **This is a Decision Gate — report the results before M2.**
 
 ---
 
@@ -343,7 +353,8 @@ Every milestone: **Goal → Tasks → Verify → Done when.** Do not merge miles
 |---|---|---|
 | Pages project-site base path | Blank page / 404 on all assets | `base: '/calorie_weight_money_tracker/'` |
 | SPA deep links on Pages | Direct URL 404s | `404.html` fallback + verify in M0 |
-| Missing RLS | Data readable anonymously | Explicit test in M1; re-check before M8 |
+| Missing RLS | Data readable anonymously | Explicit test in M1 (anonymous write must fail `42501`); re-check before M8 |
+| PostgREST schema cache lags | Newly created tables return `404 / PGRST205` straight after a migration | Wait for the cache to refresh, or run `notify pgrst, 'reload schema'`. It is not a migration failure. |
 | Free model lacks `response_format` | 400 or unparseable output | Forced `tool_choice`, never `response_format` |
 | Web plugin + forced tool call | Search results ignored, or 400 | Search plugin runs once per request; if it conflicts with `tool_choice`, split into two calls (research, then emit) |
 | Free-model rate limits | 429s | Check limits; fall back to paid slug |
