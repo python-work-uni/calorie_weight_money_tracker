@@ -200,8 +200,10 @@ where relname in ('profiles','weight_logs','food_entries','food_categories',
 
 **Tasks**
 1. `useWeight.ts`: CRUD against `weight_logs`, upsert on `date` (one entry per date).
-2. `Weight.tsx`: log form + list.
-3. `WeightTrend.tsx`: Recharts line with raw points plus a 7-day rolling average; range selector (30/90/365 days); "change over range" readout; optional goal line.
+2. `src/lib/weight.ts`: chart maths as a pure, tested module — `buildSeries`, `filterByRange`, `changeOverRange`.
+   *Decision:* the rolling window is measured in **days, not samples**. Weigh-ins are not reliably daily, so a sample-count window would keep averaging stale readings in after a gap. Covered by tests.
+3. `Weight.tsx`: log form + list, range selector, change-over-range readout.
+4. `WeightTrend.tsx`: Recharts line with raw points plus the 7-day average, and an optional goal line read from `profiles.goal_weight_kg` (added by migration `0004`).
 
 **Verify**
 - Log three weights on different dates; the chart shows them and the rolling average is visibly smoothed.
