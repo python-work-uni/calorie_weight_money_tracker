@@ -179,9 +179,11 @@ where relname in ('profiles','weight_logs','food_entries','food_categories',
 
 **Tasks**
 1. `src/lib/tdee.ts`: Mifflin-St Jeor exactly as MVP.md §6, returning `{bmr, tdee, target_kcal}`. Pure function, no I/O.
-2. `Profile.tsx`: form for height, DOB, sex, activity, goal type, goal rate, timezone. Reads latest weight from `weight_logs` if present.
-3. Display BMR / TDEE / target, target rounded to nearest 10 kcal.
-4. **Unit test `tdee.ts`** with at least three known cases (one per sex/goal combination). Put it beside the module.
+2. `src/lib/dates.ts`: `todayInTimeZone(tz)`, so "which day is this?" never depends on the host zone.
+3. `Profile.tsx`: form for height, DOB, sex, activity, goal type, goal rate, timezone — plus **weight today**, which upserts `weight_logs` for the current date.
+   *Deliberate deviation:* the target cannot be computed without a weight, and M3 (weight logging) comes later, so the milestone would otherwise be unverifiable. The user described Profile as "a page to log data about myself like weight, height, age", so writing a weight here matches that intent. It **upserts** on `(user_id, date)`, so it cannot create the duplicate rows M3 forbids.
+4. Display BMR / TDEE / target, target rounded to nearest 10 kcal, recomputed on every keystroke.
+5. **Unit tests** for `tdee.ts` (known cases across sex/goal) and `dates.ts` (day-boundary cases), beside each module.
 
 **Verify**
 - `npm test` passes the TDEE cases.
